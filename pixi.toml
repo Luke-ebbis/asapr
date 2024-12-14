@@ -9,11 +9,12 @@ platforms = ["linux-64"]
 [tasks]
 echo = { cmd = "echo $ARGUMENT", env = { ARGUMENT = "hello" } }
 make-readme="R -q -e 'devtools::build_readme()'"
-update-bindings= "R -q -e 'rextendr::document()'"
-install-rextender = {cmd=""" R -q -e " install.packages('rextendr', repos = c('https://extendr.r-universe.dev', 'https://cloud.r-project.org'), '.pixi/envs/default/lib/R/library/') "  """}
+update-bindings= {cmd="R -q -e 'rextendr::document()'"}
 
 [dependencies]
 r-devtools = ">=2.4.5,<2.5"
 gcc = "*"
 
 
+[activation]
+scripts = ["setup.sh"]
