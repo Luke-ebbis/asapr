@@ -7,13 +7,37 @@ channels = ["conda-forge"]
 platforms = ["linux-64"]
 
 [tasks]
-echo = { cmd = "echo $ARGUMENT", env = { ARGUMENT = "hello" } }
+## Tasks.
+##
+## make-readme
+##  Build the readme
 make-readme="R -q -e 'devtools::build_readme()'"
+##
+## update-bindings
+##  Update the rust bindings.
+##
 update-bindings= {cmd="R -q -e 'rextendr::document()'"}
+## r-check
+##  Check package formatting.
+##
+r-check = "R CMD check ."
+## r-load
+##  Load the package into the libraries of pixi.
+##
+r-load = "R -q -e 'devtools::load_all()'"
+## help
+##  This text.
+##
+help = "rg '^##' pixi.toml | sd '##' '' "
+
 
 [dependencies]
 r-devtools = ">=2.4.5,<2.5"
 gcc = "*"
+coreutils = "*"
+# Sed alternative
+sd = "*"
+ripgrep = ">=14.1.1,<14.2"
 
 
 [activation]
