@@ -11,7 +11,7 @@ experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](h
 status](https://www.r-pkg.org/badges/version/asapr)](https://CRAN.R-project.org/package=asapr)
 <!-- badges: end -->
 
-The goal of asapr is to …
+The goal of asapr is to help taxonomist delineate species.
 
 ## Installation
 
