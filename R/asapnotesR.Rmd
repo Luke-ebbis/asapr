@@ -1,0 +1,204 @@
+---
+title: "asapplaygroundnotes"
+author: "chrissi_m"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(ape)
+library(Biostrings)
+library(pegas)
+```
+
+
+
+# functions and tests
+
+
+## paths from /exampledata
+
+```{r}
+
+fafile <- file.path(here::here("exampledata", "sample.fasta-2line"))
+```
+
+```{r}
+getbins <- function(fafile) {
+
+    ape::as.DNAbin(Biostrings::readDNAStringSet(fafile))
+
+}
+```
+
+
+```{r}
+bins <- getbins(fafile)
+```
+
+
+
+```{r}
+## unused but at least 1 haplotypes with 2 inds
+
+haplos <- pegas::haplotype(bins)
+```
+
+#library(Biostrings)
+#library(DECIPHER)
+
+```{r}
+# MATRICES
+
+## ape distance matrix on bins
+### only returns non-NA matrices here when pairwise.deletion = TRUE
+didmatraw <- dist.dna(x = bins, model = "raw", as.matrix = TRUE, pairwise.deletion = TRUE)
+#### Jukes and Cantor (1969). It assumes that all substitutions (i.e. a change of a base by another one) have the same probability.
+### Assumes base freqs. are balanced, i.e. ~0.25 each. Does not really apply here, but how strict is strict actually?!!
+didmatJC69 <- dist.dna(x = bins, model = "JC69", as.matrix = TRUE, pairwise.deletion = TRUE)
+### Maybe suited better in this example due to imbalanced A:T:C:G??!
+didmatF81 <- dist.dna(x = bins, model = "F81", as.matrix = TRUE, pairwise.deletion = TRUE)
+
+
+
+
+#### DISTANCES
+
+## ape distances on bins (similar to above but only lower triangle returned, i.e. a "dist" object)
+## as.matrix = FALSE (like, here) is the default
+### only returns non-NA entries here when pairwise.deletion = TRUE
+### ...<- dist.dna(x = bins, model = "raw", as.matrix = FALSE, pairwise.deletion = TRUE)
+### same as:
+didraw <- dist.dna(x = bins, model = "raw",                    pairwise.deletion = TRUE)
+
+#### Jukes and Cantor (1969). It assumes that all substitutions (i.e. a change of a base by another one) have the same probability.
+### Assumes base freqs. are balanced, i.e. ~0.25 each. Does not really apply here, but how strict is strict actually?!!
+didJC69 <- dist.dna(x = bins, model = "JC69", pairwise.deletion = TRUE)
+### Maybe suited better in this example due to imbalanced A:T:C:G??!
+didF81 <- dist.dna(x = bins, model = "F81", pairwise.deletion = TRUE)
+### need to read up about this one
+didK80 <- dist.dna(x = bins, model = "K80", pairwise.deletion = TRUE)
+```
+
+
+```{r}
+
+#### PLOTS FROM DIST OBJECTS 
+#### check impact of balance assumption
+plot(didJC69, didF81)
+abline(b = 1, a = 0)
+#### check distributions using histograms
+hist(didraw)
+hist(didF81)
+
+
+
+```
+
+
+
+## Trees
+
+
+### Neighbour Joining as explained in: (Analysis of Phylogenetics and Evolution with R)[https://www.mimuw.edu.pl/~lukaskoz/teaching/sad2/books/Analysis_of_Phylogenetics_and_Evolution_with_R.pdf]
+###
+# "The neighbor-joining (NJ) is one of the most widely used methods of phy-
+# logeny estimation. It is a splitting method. The first step is to build a tree
+# with a single internal branch where one node is linked to two observations
+# (the neighbors), and the other is linked to all the others. All possible pairs of
+# neighbors are considered: the tree with the smallest total branch length is se-
+# lected. The second step is to update the distance matrix by removing the two
+# neighbors and calculating the distance from the new node to the remaining
+# observations. The two steps are repeated until the tree is dichotomous. The
+# branch lengths are estimated by least squares, so the rates of evolution may
+# vary among branches."
+
+
+# loop through dist objects created from bins (a DNAbin object) using differnt substitution/evolutionary models
+# and perform Neighbour Joining
+
+
+
+```{r}
+### short version to loop through different models, get distances and directly perform Neighbour Joining on each Dist
+
+mod <- list("raw", "JC69", "K80", "F81", "F84")
+njs <- lapply(mod, function(m) njs(dist.dna(bins, model = m, pairwise.deletion = TRUE)))
+
+```
+
+```{r}
+njs
+```
+
+
+```{r}
+bionjs <- lapply(mod, function(m) ape::bionjs(dist.dna(bins, model = m, pairwise.deletion = TRUE)))
+bionjs
+```
+
+
+
+<!-- aln <- as.alignment(as.character(bins)) -->
+
+<!-- bsaln <- readDNAMultipleAlignment(fafile) -->
+
+<!-- aln2 <- as.alignment(bsaln) -->
+
+
+
+
+
+
+
+<!-- mod <- list("JC69", "K80", "F81", "F84") -->
+<!-- njs <- lapply(mod, function(m) njs(dist.dna(bins, model = m, pairwise.deletion = TRUE))) -->
+
+
+
+<!-- pdist <- function(seq1, seq2) { -->
+
+<!--     if!(length(seq1) != length(seq2)){ -->
+<!--         stop("Strings must be of equal length.") -->
+<!--     } -->
+<!-- dist_counter = 0 -->
+<!-- for n in range(len(string1)): -->
+<!--     if string1[n] != string2[n]: -->
+<!--     dist_counter += 1 -->
+<!-- return dist_counter -->
+
+
+
+<!-- function(a="ATTCGAN",b="attTGTT",exclude=c("n","N","?"),ignore.case=TRUE) -->
+<!-- { -->
+<!--     if(nchar(a)!=nchar(b)) stop("Lengths of input strings differ. Please check your input.") -->
+<!--     if(ignore.case==TRUE) -->
+<!--     { -->
+<!--         a<-toupper(a) -->
+<!--         b<-toupper(b) -->
+<!--     } -->
+<!--     diff.a<-unlist(strsplit(a,split="")) -->
+<!--     diff.b<-unlist(strsplit(b,split="")) -->
+<!--     diff.d<-rbind(diff.a,diff.b) -->
+<!--     for(ex.loop in 1:length(exclude)) -->
+<!--     { -->
+<!--         diff.d<-diff.d[,!(diff.d[1,]==exclude[ex.loop]|diff.d[2,]==exclude[ex.loop])] -->
+<!--     } -->
+<!--     differences<-sum(diff.d[1,]!=diff.d[2,]) -->
+<!--     return(differences) -->
+<!-- } -->
+
+
+<!-- nextree.file <- here::here("exampledata/DNAtaxData.nex") -->
+
+<!-- nextree <- ape::read.nexus(nextree.file) -->
+
+
+<!-- tree.file <- here::here("exampledata/asv-listerria-taxon-Bacillales-Order.fasta.final_tree.fa") -->
+
+<!-- tr <- read.tree(tree.file) -->
+
